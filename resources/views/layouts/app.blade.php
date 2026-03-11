@@ -12,58 +12,51 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Instrument Sans', 'ui-sans-serif', 'system-ui'],
-                    },
-                },
-            },
-        };
-    </script>
+    <style>
+        {
+            ! ! file_get_contents(resource_path('css/app.css')) ! !
+        }
+    </style>
     @endif
 </head>
 
-<body class="min-h-screen bg-gradient-to-b from-stone-100 via-white to-stone-50 text-gray-900 font-['Instrument Sans']">
-    <header class="bg-white border-b border-stone-200/70 shadow-sm">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-md bg-stone-900 text-white flex items-center justify-center text-sm font-semibold">WG</div>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <div class="brand-mark">WG</div>
                 <div>
-                    <p class="text-lg font-semibold text-stone-900">Wheely Good Cars</p>
-                    <p class="text-sm text-stone-500">Tweedehands aanbod</p>
+                    <p class="brand-title">Wheely Good Cars</p>
+                    <p class="brand-subtitle">Tweedehands aanbod</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 text-sm text-stone-700">
-                <a class="px-3 py-2 rounded-md border border-stone-200 bg-white hover:bg-stone-50" href="{{ route('cars.index') }}">Publiek</a>
+            <div class="nav-actions">
+                <a class="btn" href="{{ route('cars.index') }}">Publiek</a>
                 @auth
-                <a class="px-3 py-2 rounded-md border border-stone-200 bg-white hover:bg-stone-50" href="{{ route('provider.cars.index') }}">Mijn aanbod</a>
+                <a class="btn" href="{{ route('provider.cars.index') }}">Mijn aanbod</a>
                 @if (auth()->user()->isAdmin())
-                <a class="px-3 py-2 rounded-md border border-stone-200 bg-white hover:bg-stone-50" href="{{ route('admin.dashboard') }}">Admin</a>
+                <a class="btn" href="{{ route('admin.dashboard') }}">Admin</a>
                 @endif
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
                     @csrf
-                    <button class="px-3 py-2 rounded-md bg-stone-900 text-white hover:bg-stone-800" type="submit">Logout</button>
+                    <button class="btn btn-primary" type="submit">Logout</button>
                 </form>
                 @else
-                <a class="px-3 py-2 rounded-md border border-stone-200 bg-white hover:bg-stone-50" href="{{ route('login.show') }}">Login</a>
-                <a class="px-3 py-2 rounded-md bg-stone-900 text-white hover:bg-stone-800" href="{{ route('register.show') }}">Registreren</a>
+                <a class="btn" href="{{ route('login.show') }}">Login</a>
+                <a class="btn btn-primary" href="{{ route('register.show') }}">Registreren</a>
                 @endauth
             </div>
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 py-8">
+    <main class="container main-content">
         @yield('content')
     </main>
 
-    <footer class="border-t border-stone-200/70 bg-white/90 mt-8">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-stone-600">
-            <span>© {{ date('Y') }} Ben Linders</span>
-            <span class="text-stone-500">Eerlijke tweedehands auto's, dagelijks bijgewerkt.</span>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p class="footer-note">© {{ date('Y') }} Ben Lindersw</p>
+            <p class="footer-note">Eerlijke tweedehands auto's, dagelijks bijgewerkt.</p>
         </div>
     </footer>
 </body>
