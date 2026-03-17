@@ -55,7 +55,7 @@
 
     <footer class="site-footer">
         <div class="container footer-inner">
-            <p class="footer-note">© {{ date('Y') }} Ben Lindersw</p>
+            <p class="footer-note">© {{ date('Y') }} Ben Linders</p>
             <p class="footer-note">Eerlijke tweedehands auto's, dagelijks bijgewerkt.</p>
         </div>
     </footer>
