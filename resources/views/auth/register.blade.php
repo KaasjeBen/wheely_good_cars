@@ -30,8 +30,8 @@
             <label class="block text-sm text-gray-200 mb-1">Herhaal wachtwoord</label>
             <input type="password" name="password_confirmation" class="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400/70" required>
         </div>
-        <button type="submit" class="w-full inline-flex justify-center px-4 py-3 rounded-lg bg-orange-500 text-black font-semibold hover:bg-orange-400 transition">Account aanmaken</button>
-        <p class="text-sm text-gray-300">Heb je al een account? <a class="text-orange-200 underline" href="{{ route('login.show') }}">Log in</a></p>
+        <button type="submit" class="w-full inline-flex justify-center px-4 py-3 rounded-lg bg-green-500 text-black font-semibold hover:bg-green-700 transition">Account aanmaken</button>
+        <p class="text-sm text-gray-300">Heb je al een account? <a class="text-green-200 underline" href="{{ route('login.show') }}">Log in</a></p>
     </form>
 </div>
 @endsection
