@@ -1,7 +1,7 @@
 @php
 use Illuminate\Support\Str;
 
-$featuredIndexes = collect(range(0, max($cars->count() - 1, 0)))->filter(fn ($i) => $i % 7 === 0)->all();
+$featuredIds = collect($cars->items())->pluck('id')->shuffle()->take(max(1, min(2, $cars->count())))->all();
 
 $brandPalettes = [
 'volvo' => [
@@ -51,11 +51,11 @@ $brandPalettes = [
 <div class="cars-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
     @forelse ($cars as $car)
     @php
-    $isFeatured = in_array($loop->index, $featuredIndexes);
+    $isFeatured = in_array($car->id, $featuredIds);
     $key = strtolower($car->make ?? '');
     $palette = $brandPalettes[$key] ?? $brandPalettes['default'];
     @endphp
-    <a href="{{ route('cars.show', $car) }}" class="car-card group relative overflow-hidden rounded-lg border border-stone-200 bg-white p-5 flex flex-col gap-4 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition {{ $isFeatured ? 'lg:col-span-2 lg:row-span-2' : '' }}">
+    <a href="{{ route('cars.show', $car) }}" class="car-card group relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-5 flex flex-col gap-4 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg {{ $isFeatured ? 'lg:col-span-2 lg:row-span-2' : '' }}">
         <div class="car-stripe absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r {{ $palette['stripe'] }}"></div>
         <div class="car-header relative flex items-start justify-between gap-3">
             <div>
@@ -65,7 +65,7 @@ $brandPalettes = [
             </div>
             <span class="car-price px-3 py-2 rounded-md {{ $palette['pill']['bg'] }} {{ $palette['pill']['text'] }} {{ $palette['pill']['border'] }} border text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.05)]">€ {{ number_format($car->price, 0, ',', '.') }}</span>
         </div>
-        <div class="car-placeholder relative h-40 md:h-44 {{ $isFeatured ? 'lg:h-64' : '' }} rounded-md border border-stone-200 overflow-hidden flex items-center justify-center bg-gradient-to-br {{ $palette['placeholder'] }}">
+        <div class="car-placeholder relative h-40 md:h-44 {{ $isFeatured ? 'lg:h-64' : '' }} rounded-xl border border-stone-200 overflow-hidden flex items-center justify-center bg-gradient-to-br {{ $palette['placeholder'] }}">
             <div class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_30%_25%,rgba(0,0,0,0.08),transparent_35%),radial-gradient(circle_at_70%_30%,rgba(0,0,0,0.05),transparent_32%)]"></div>
             <span class="car-placeholder-mark relative text-4xl font-black text-stone-300">WG</span>
         </div>
@@ -83,6 +83,8 @@ $brandPalettes = [
         </div>
     </a>
     @empty
-    <div class="col-span-full text-center py-12 text-stone-600">Geen resultaten gevonden. Pas je zoekopdracht of filters aan.</div>
+    <div class="col-span-full rounded-2xl border border-dashed border-stone-300 bg-stone-50 text-center py-12 text-stone-600">
+        Geen resultaten gevonden. Pas je zoekopdracht of filters aan.
+    </div>
     @endforelse
 </div>

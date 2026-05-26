@@ -1,34 +1,59 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl shadow-orange-500/10 backdrop-blur">
-    <div class="flex items-center justify-between mb-6">
+<section class="section-surface space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-            <p class="text-sm text-orange-300 uppercase tracking-[0.3em] mb-2">Tag statistieken</p>
-            <h1 class="text-3xl font-semibold leading-tight">Gebruik per tag</h1>
+            <p class="pill w-fit">Tag statistieken</p>
+            <h1 class="mt-3 text-3xl font-semibold tracking-tight text-stone-900">Gebruik per tag</h1>
+            <p class="mt-2 text-stone-600">Overzicht van totaal, verkocht en beschikbaar per eigenschap.</p>
         </div>
-        <a href="{{ route('admin.dashboard') }}" class="px-4 py-2 rounded-lg bg-white/10 border border-white/10 hover:bg-white/15">Dashboard</a>
+        <a href="{{ route('admin.dashboard') }}" class="btn">Dashboard</a>
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-gray-200 border border-white/10 rounded-lg overflow-hidden">
-            <thead class="bg-white/5">
+    <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-stone-200 text-sm">
+            <thead class="bg-stone-50 text-stone-600">
                 <tr>
-                    <th class="text-left px-4 py-3">Tag</th>
-                    <th class="text-left px-4 py-3">Totaal gebruikt</th>
-                    <th class="text-left px-4 py-3">Verkochte auto's</th>
+                    <th class="px-4 py-3 text-left font-semibold">Tag</th>
+                    <th class="px-4 py-3 text-left font-semibold">Totaal</th>
+                    <th class="px-4 py-3 text-left font-semibold">Verkocht</th>
+                    <th class="px-4 py-3 text-left font-semibold">Beschikbaar</th>
+                    <th class="px-4 py-3 text-left font-semibold">Verdeling</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-stone-200">
                 @foreach ($tags as $tag)
-                <tr class="border-t border-white/5">
-                    <td class="px-4 py-3">{{ $tag->name }}</td>
-                    <td class="px-4 py-3">{{ $tag->total_usage }}</td>
-                    <td class="px-4 py-3">{{ $tag->sold_usage }}</td>
+                <tr>
+                    <td class="px-4 py-4 font-medium text-stone-900">{{ $tag->name }}</td>
+                    <td class="px-4 py-4 text-stone-700">{{ $tag->total_usage }}</td>
+                    <td class="px-4 py-4 text-stone-700">{{ $tag->sold_usage }}</td>
+                    <td class="px-4 py-4 text-stone-700">{{ $tag->available_usage }}</td>
+                    <td class="px-4 py-4">
+                        <div class="h-2 rounded-full bg-stone-100 overflow-hidden">
+                            @php
+                            $total = max(1, $tag->total_usage);
+                            $soldWidth = ($tag->sold_usage / $total) * 100;
+                            $availableWidth = ($tag->available_usage / $total) * 100;
+                            @endphp
+                            <div class="flex h-2 w-full">
+                                <div class="bg-rose-500" data-width="{{ $soldWidth }}"></div>
+                                <div class="bg-emerald-500" data-width="{{ $availableWidth }}"></div>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-</div>
+</section>
+
+<script>
+    (() => {
+        document.querySelectorAll('[data-width]').forEach((element) => {
+            element.style.width = `${element.dataset.width}%`;
+        });
+    })();
+</script>
 @endsection

@@ -1,15 +1,16 @@
 @import url('https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700');
+@import "tailwindcss";
 
 :root {
-    --bg: #f7f7f5;
+    --bg: #f3f8f4;
     --card: #ffffff;
-    --border: #e1e1e1;
-    --text: #161616;
-    --muted: #5c5c5c;
-    --accent: #101010;
+    --border: #d8e6dd;
+    --text: #0f1b14;
+    --muted: #587567;
+    --accent: #2e8b57;
     --accent-contrast: #ffffff;
     --radius: 8px;
-    --shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow: 0 8px 24px rgba(17, 68, 45, 0.08);
 }
 
 * {
@@ -18,7 +19,9 @@
 
 body {
     margin: 0;
-    background: var(--bg);
+    background: radial-gradient(circle at 20% 20%, rgba(46, 139, 87, 0.09), transparent 32%),
+        radial-gradient(circle at 80% 0%, rgba(46, 139, 87, 0.06), transparent 28%),
+        var(--bg);
     color: var(--text);
     font-family: 'Instrument Sans', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
@@ -30,19 +33,24 @@ a {
 }
 
 a:hover {
-    color: #0d5dd8;
+    color: #207349;
+    text-decoration: underline;
 }
 
 .container {
-    max-width: 1040px;
+    max-width: 1120px;
     margin: 0 auto;
     padding: 0 20px;
 }
 
 .site-header {
-    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 251, 248, 0.9));
     border-bottom: 1px solid var(--border);
-    box-shadow: var(--shadow);
+    box-shadow: 0 6px 20px rgba(17, 68, 45, 0.08);
 }
 
 .header-inner {
@@ -94,6 +102,10 @@ a:hover {
     justify-content: flex-end;
 }
 
+.nav-actions .btn {
+    height: 38px;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -102,7 +114,7 @@ a:hover {
     padding: 8px 12px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
-    background: var(--card);
+    background: linear-gradient(180deg, #ffffff, #f3f8f4);
     color: var(--text);
     font-weight: 600;
     font-size: 0.95rem;
@@ -112,8 +124,8 @@ a:hover {
 }
 
 .btn:hover {
-    background: #f1f1f1;
-    border-color: #d5d5d5;
+    background: linear-gradient(180deg, #ffffff, #eaf3ed);
+    border-color: #c2d6c8;
 }
 
 .btn:active {
@@ -121,24 +133,109 @@ a:hover {
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: linear-gradient(180deg, #2e8b57, #277549);
     color: var(--accent-contrast);
-    border-color: var(--accent);
+    border-color: #277549;
 }
 
 .btn-primary:hover {
-    background: #242424;
-    border-color: #242424;
+    background: linear-gradient(180deg, #349e63, #2a7e4f);
+    border-color: #2a7e4f;
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+    color: #2a7e4f;
+}
+
+.btn-ghost:hover {
+    background: #eaf3ed;
+    border-color: #c2d6c8;
 }
 
 .main-content {
-    padding: 28px 0 36px;
+    padding: 36px 0 56px;
 }
 
 .site-footer {
     border-top: 1px solid var(--border);
-    background: var(--card);
+    background: linear-gradient(180deg, rgba(243, 248, 244, 0.9), #f9fdfb);
     color: var(--muted);
+}
+
+.section-surface {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+input:not([type=checkbox]):not([type=radio]),
+select,
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fff;
+    color: var(--text);
+    font: inherit;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    border-color: #2e8b57;
+    box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.18);
+}
+
+label {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f3f3;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.shadow-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.stat {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #f9fdfb;
+}
+
+.stat .label {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.stat .value {
+    font-weight: 700;
+    color: var(--text);
 }
 
 .footer-inner {
@@ -157,7 +254,13 @@ a:hover {
 .cars-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
+    gap: 18px;
+}
+
+@media (min-width: 1024px) {
+    .cars-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
 }
 
 .car-card {
@@ -165,32 +268,33 @@ a:hover {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 16px;
+    padding: 18px;
     display: flex;
     flex-direction: column;
     gap: 12px;
     color: var(--text);
     text-decoration: none;
     box-shadow: var(--shadow);
-    transition: transform 150ms ease, box-shadow 150ms ease;
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
 }
 
 .car-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 28px rgba(17, 68, 45, 0.16);
+    border-color: #b7d2c0;
 }
 
 .car-stripe {
     height: 4px;
     border-radius: 10px 10px 0 0;
-    background: linear-gradient(90deg, #dcdcdc, #f4f4f4);
+    background: linear-gradient(90deg, #bce3c9, #e2f2e7);
 }
 
 .car-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
 }
 
 .car-title {
@@ -214,8 +318,8 @@ a:hover {
 
 .car-placeholder {
     border: 1px dashed var(--border);
-    background: #f6f6f6;
-    color: #cfcfcf;
+    background: #f0f7f2;
+    color: #9ab5a6;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -232,12 +336,17 @@ a:hover {
 }
 
 .car-tag {
-    border: 1px solid var(--border);
-    background: #f8f8f8;
+    border: 1px solid #cfe4d6;
+    background: #e9f5ed;
     border-radius: 999px;
     padding: 6px 10px;
-    color: var(--text);
+    color: #1f3a2b;
     font-size: 0.85rem;
+}
+
+.car-tag:hover {
+    background: #dff0e6;
+    border-color: #b7d2c0;
 }
 
 .car-footer {
@@ -250,4 +359,38 @@ a:hover {
 .car-link {
     color: var(--text);
     font-weight: 600;
+}
+
+/* Tighter pagination buttons on the homepage */
+#pagination nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#pagination nav .flex {
+    gap: 8px;
+}
+
+#pagination nav a,
+#pagination nav span {
+    padding: 7px 11px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+}
+
+#pagination nav svg {
+    width: 16px;
+    height: 16px;
+}
+
+#pagination nav a {
+    color: #1f3a2b;
+    border: 1px solid #cfe4d6;
+    background: #f7fbf8;
+}
+
+#pagination nav a:hover {
+    background: #eaf3ed;
+    border-color: #b7d2c0;
 }

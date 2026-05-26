@@ -5,34 +5,26 @@
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
-            color: #111;
+            color: #1f2937;
+            margin: 0;
+            padding: 24px;
         }
 
         h1 {
-            font-size: 20px;
-            margin-bottom: 4px;
+            font-size: 22px;
+            margin: 0 0 6px;
         }
 
         .meta {
-            color: #555;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #f5a623;
-            color: #fff;
-            border-radius: 12px;
-            margin-right: 6px;
-            margin-bottom: 4px;
+            color: #6b7280;
+            margin-bottom: 18px;
         }
 
         .box {
-            border: 1px solid #ddd;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
         }
 
         table {
@@ -41,47 +33,57 @@
         }
 
         td {
-            padding: 4px 0;
+            padding: 6px 0;
+            vertical-align: top;
         }
 
-        .muted {
-            color: #555;
+        .label {
+            width: 35%;
+            color: #6b7280;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 0 6px 6px 0;
+            border-radius: 999px;
+            background: #f3f4f6;
         }
     </style>
 </head>
 
 <body>
     <h1>{{ $car->display_title }}</h1>
-    <div class="meta">Kenteken: {{ $car->license_plate ?? 'nvt' }} | Aanbieder: {{ $car->user?->name }}</div>
+    <div class="meta">Kenteken: {{ $car->license_plate ?? 'Onbekend' }} | Aanbieder: {{ $car->user?->name ?? 'Onbekend' }}</div>
 
     <div class="box">
         <table>
             <tr>
-                <td class="muted">Merk</td>
+                <td class="label">Merk</td>
                 <td>{{ $car->make }}</td>
             </tr>
             <tr>
-                <td class="muted">Model</td>
+                <td class="label">Model</td>
                 <td>{{ $car->model }}</td>
             </tr>
             <tr>
-                <td class="muted">Bouwjaar</td>
+                <td class="label">Bouwjaar</td>
                 <td>{{ $car->year ?? 'Onbekend' }}</td>
             </tr>
             <tr>
-                <td class="muted">Kilometerstand</td>
+                <td class="label">Kilometerstand</td>
                 <td>{{ number_format($car->mileage, 0, ',', '.') }} km</td>
             </tr>
             <tr>
-                <td class="muted">Vraagprijs</td>
+                <td class="label">Vraagprijs</td>
                 <td>€ {{ number_format($car->price, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td class="muted">Status</td>
+                <td class="label">Status</td>
                 <td>{{ $car->status === 'sold' ? 'Verkocht' : 'Beschikbaar' }}</td>
             </tr>
             <tr>
-                <td class="muted">Views</td>
+                <td class="label">Views</td>
                 <td>{{ $car->views }}</td>
             </tr>
         </table>
@@ -90,17 +92,19 @@
     @if ($car->description)
     <div class="box">
         <strong>Omschrijving</strong>
-        <div>{{ $car->description }}</div>
+        <div style="margin-top: 6px; line-height: 1.5;">{{ $car->description }}</div>
     </div>
     @endif
 
     <div class="box">
-        <strong>Tags</strong><br>
-        @forelse ($car->tags as $tag)
-        <span class="badge">{{ $tag->name }}</span>
-        @empty
-        <span class="muted">Geen tags</span>
-        @endforelse
+        <strong>Tags</strong>
+        <div style="margin-top: 8px;">
+            @forelse ($car->tags as $tag)
+            <span class="badge">{{ $tag->name }}</span>
+            @empty
+            <span>Geen tags</span>
+            @endforelse
+        </div>
     </div>
 </body>
 

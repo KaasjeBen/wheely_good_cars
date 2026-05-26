@@ -109,7 +109,8 @@ class ProviderCarController extends Controller
 
         return response()->json([
             'status' => $car->status,
-            'price' => number_format($car->price, 0, ',', '.'),
+            'price' => (float) $car->price,
+            'price_label' => '€ ' . number_format($car->price, 0, ',', '.'),
         ]);
     }
 
@@ -138,20 +139,45 @@ class ProviderCarController extends Controller
             return response()->json(['error' => 'Geen kenteken'], 400);
         }
 
-        $response = Http::get('https://opendata.rdw.nl/resource/m9d7-ebf2.json', [
+        $ovi = Http::timeout(8)->get('https://ovi.rdw.nl/RestApi/VehicleSearch', [
+            'Kenteken' => $plate,
+        ]);
+
+        if ($ovi->successful() && $ovi->json()) {
+            $payload = $ovi->json();
+            $vehicle = is_array($payload) && isset($payload[0]) ? $payload[0] : $payload;
+
+            $make = $vehicle['Merk'] ?? $vehicle['merk'] ?? null;
+            $model = $vehicle['Handelsbenaming'] ?? $vehicle['handelsbenaming'] ?? null;
+
+            $yearRaw = $vehicle['DatumEersteToelating'] ?? $vehicle['DatumTenaamstelling'] ?? $vehicle['datum_tenaamstelling'] ?? null;
+            $year = $yearRaw ? (int) substr((string) $yearRaw, 0, 4) : null;
+
+            if ($make || $model || $year) {
+                return [
+                    'make' => $make,
+                    'model' => $model,
+                    'year' => $year,
+                    'source' => 'ovi',
+                ];
+            }
+        }
+
+        $fallback = Http::timeout(8)->get('https://opendata.rdw.nl/resource/m9d7-ebf2.json', [
             'kenteken' => $plate,
         ]);
 
-        if ($response->failed() || $response->json() === []) {
+        if ($fallback->failed() || $fallback->json() === []) {
             return response()->json(['error' => 'Geen RDW match'], 404);
         }
 
-        $data = $response->json()[0];
+        $data = $fallback->json()[0];
 
         return [
             'make' => $data['merk'] ?? null,
             'model' => $data['handelsbenaming'] ?? null,
             'year' => isset($data['datum_tenaamstelling']) ? (int) substr($data['datum_tenaamstelling'], 0, 4) : null,
+            'source' => 'opendata',
         ];
     }
 

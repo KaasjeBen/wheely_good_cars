@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\CarView;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Tag;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,38 +18,31 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdmin();
 
-        return view('admin.dashboard');
+        return view('admin.dashboard', [
+            'metrics' => $this->buildMetrics(),
+        ]);
     }
 
     public function metrics()
     {
         $this->ensureAdmin();
-        $today = Carbon::today();
 
-        $totalCars = Car::count();
-        $sold = Car::where('status', 'sold')->count();
-        $todayOffered = Car::whereDate('created_at', $today)->count();
-        $providers = User::where('role', 'provider')->count();
-        $viewsToday = Car::whereDate('updated_at', $today)->sum('views');
-        $avgPerProvider = $providers > 0 ? round($totalCars / $providers, 2) : 0;
-
-        return [
-            'totalCars' => $totalCars,
-            'sold' => $sold,
-            'todayOffered' => $todayOffered,
-            'providers' => $providers,
-            'viewsToday' => $viewsToday,
-            'avgPerProvider' => $avgPerProvider,
-        ];
+        return $this->buildMetrics();
     }
 
     public function tagUsage()
     {
         $this->ensureAdmin();
 
-        $tags = Tag::withCount(['cars as total_usage', 'cars as sold_usage' => function ($q) {
-            $q->where('status', 'sold');
-        }])->get();
+        $tags = Tag::query()
+            ->withCount([
+                'cars as total_usage',
+                'cars as sold_usage' => fn($query) => $query->where('status', 'sold'),
+                'cars as available_usage' => fn($query) => $query->where('status', 'available'),
+            ])
+            ->orderByDesc('total_usage')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.tag-usage', compact('tags'));
     }
@@ -54,84 +50,104 @@ class AdminDashboardController extends Controller
     public function suspicious()
     {
         $this->ensureAdmin();
-        $now = Carbon::now();
-        $oneYearAgo = $now->copy()->subYear();
+        $providers = User::where('role', 'provider')
+            ->with(['cars.tags'])
+            ->get()
+            ->map(function (User $user) {
+                $cars = $user->cars;
+                $reasons = $this->suspiciousReasons($user, $cars);
 
-        $users = User::where('role', 'provider')->get()->filter(function (User $user) use ($oneYearAgo) {
-            $cars = $user->cars()->with('tags')->get();
-            if ($cars->isEmpty()) {
-                return false;
-            }
+                if (count($reasons) === 0) {
+                    return null;
+                }
 
-            $reasons = [];
-            if (!$user->phone) {
-                $reasons[] = 'Geen telefoonnummer';
-            }
+                return [
+                    'user' => $user,
+                    'cars' => $cars,
+                    'reasons' => $reasons,
+                    'reason_count' => count($reasons),
+                ];
+            })
+            ->filter()
+            ->sortByDesc('reason_count')
+            ->values();
 
-            if ($cars->where('year', '<', now()->year - 15)->where('mileage', '<', 50000)->count() > 0) {
-                $reasons[] = 'Oude auto met lage km-stand';
-            }
+        return view('admin.suspicious', ['providers' => $providers]);
+    }
 
-            $sameDaySold = $cars->where('status', 'sold')->groupBy(fn($c) => optional($c->sold_at)->format('Y-m-d'))->filter(function ($group) {
-                return $group->count() > 3 && $group->every(fn($c) => $c->price > 10000);
-            });
-            if ($sameDaySold->isNotEmpty()) {
-                $reasons[] = 'Meerdere duurdere auto\'s dezelfde dag verkocht';
-            }
+    private function buildMetrics(): array
+    {
+        $today = Carbon::today();
+        $providers = User::where('role', 'provider')->count();
+        $totalCars = Car::count();
+        $sold = Car::where('status', 'sold')->count();
+        $available = max(0, $totalCars - $sold);
+        $todayOffered = Car::whereDate('created_at', $today)->count();
+        $viewsToday = Schema::hasTable('car_views') ? CarView::whereDate('created_at', $today)->count() : 0;
+        $avgPerProvider = $providers > 0 ? round($totalCars / $providers, 2) : 0;
 
-            if ($cars->every(fn($c) => $c->price < 1000)) {
-                $reasons[] = 'Alleen aanbiedingen onder €1000';
-            }
-
-            if ($cars->every(fn($c) => $c->tags->isEmpty())) {
-                $reasons[] = 'Geen tags gebruikt';
-            }
-
-            $lastOffer = $cars->max('created_at');
-            if (!$lastOffer || $lastOffer < $oneYearAgo) {
-                $reasons[] = 'Al een jaar geen nieuwe auto aangeboden';
-            }
-
-            return count($reasons) > 0;
-        })->map(function (User $user) use ($oneYearAgo) {
-            $cars = $user->cars()->with('tags')->get();
-            $reasons = [];
-            if (!$user->phone) {
-                $reasons[] = 'Geen telefoonnummer';
-            }
-            if ($cars->where('year', '<', now()->year - 15)->where('mileage', '<', 50000)->count() > 0) {
-                $reasons[] = 'Oude auto met lage km-stand';
-            }
-            $sameDaySold = $cars->where('status', 'sold')->groupBy(fn($c) => optional($c->sold_at)->format('Y-m-d'))->filter(function ($group) {
-                return $group->count() > 3 && $group->every(fn($c) => $c->price > 10000);
-            });
-            if ($sameDaySold->isNotEmpty()) {
-                $reasons[] = 'Meerdere duurdere auto\'s dezelfde dag verkocht';
-            }
-            if ($cars->every(fn($c) => $c->price < 1000)) {
-                $reasons[] = 'Alleen aanbiedingen onder €1000';
-            }
-            if ($cars->every(fn($c) => $c->tags->isEmpty())) {
-                $reasons[] = 'Geen tags gebruikt';
-            }
-            $lastOffer = $cars->max('created_at');
-            if (!$lastOffer || $lastOffer < $oneYearAgo) {
-                $reasons[] = 'Al een jaar geen nieuwe auto aangeboden';
-            }
+        $dailyViews = collect(range(6, 0))->map(function (int $offset) {
+            $date = Carbon::today()->subDays($offset);
 
             return [
-                'user' => $user,
-                'cars' => $cars,
-                'reasons' => $reasons,
+                'label' => $date->format('D'),
+                'views' => Schema::hasTable('car_views') ? CarView::whereDate('created_at', $date)->count() : 0,
+                'offers' => Car::whereDate('created_at', $date)->count(),
             ];
         });
 
-        return view('admin.suspicious', ['providers' => $users]);
+        return [
+            'totalCars' => $totalCars,
+            'sold' => $sold,
+            'available' => $available,
+            'todayOffered' => $todayOffered,
+            'providers' => $providers,
+            'viewsToday' => $viewsToday,
+            'avgPerProvider' => $avgPerProvider,
+            'dailyViews' => $dailyViews,
+        ];
+    }
+
+    private function suspiciousReasons(User $user, Collection $cars): array
+    {
+        $reasons = [];
+        $oneYearAgo = Carbon::now()->subYear();
+
+        if (!$user->phone) {
+            $reasons[] = 'Geen telefoonnummer';
+        }
+
+        if ($cars->contains(fn($car) => (int) $car->year <= now()->year - 15 && (int) $car->mileage < 50000)) {
+            $reasons[] = 'Oude auto met lage km-stand';
+        }
+
+        $sameDaySold = $cars->where('status', 'sold')->filter(function ($car) {
+            return $car->sold_at && $car->created_at && $car->sold_at->isSameDay($car->created_at) && $car->price > 10000;
+        })->groupBy(fn($car) => $car->sold_at?->format('Y-m-d'));
+
+        if ($sameDaySold->contains(fn($group) => $group->count() > 3)) {
+            $reasons[] = 'Meer dan 3 auto\'s direct verkocht';
+        }
+
+        if ($cars->isNotEmpty() && $cars->every(fn($car) => (float) $car->price < 1000)) {
+            $reasons[] = 'Alleen aanbiedingen onder €1000';
+        }
+
+        if ($cars->isNotEmpty() && $cars->every(fn($car) => $car->tags->isEmpty())) {
+            $reasons[] = 'Geen tags gebruikt';
+        }
+
+        $lastOffer = $cars->max('created_at');
+        if (!$lastOffer || Carbon::parse($lastOffer)->lt($oneYearAgo)) {
+            $reasons[] = 'Al een jaar geen nieuwe auto aangeboden';
+        }
+
+        return $reasons;
     }
 
     private function ensureAdmin(): void
     {
-        if (!Auth::user()?->isAdmin()) {
+        if (Auth::user()?->role !== 'admin') {
             abort(403);
         }
     }

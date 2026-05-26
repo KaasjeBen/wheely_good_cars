@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CarController extends Controller
 {
@@ -42,6 +44,16 @@ class CarController extends Controller
     public function show(Car $car)
     {
         $car->increment('views');
+        // Only write to the car_views table if the migration has been run.
+        if (Schema::hasTable('car_views')) {
+            DB::table('car_views')->insert([
+                'car_id' => $car->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => substr((string) request()->userAgent(), 0, 255),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         return view('cars.show', [
             'car' => $car->load(['tags', 'user']),
