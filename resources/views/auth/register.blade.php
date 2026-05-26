@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-lg mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl shadow-orange-500/10 backdrop-blur">
+<div class="max-w-lg mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl shadow-green-500/10 backdrop-blur">
     <h1 class="text-3xl font-semibold mb-2">Account aanmaken</h1>
     <p class="text-gray-300 mb-6">Registreer als aanbieder en start met aanbieden.</p>
     <form method="POST" action="{{ route('register.perform') }}" class="space-y-4">
@@ -23,7 +23,7 @@
         </div>
         <div>
             <label class="block text-sm text-gray-200 mb-1">Wachtwoord</label>
-            <input type="password" name="password" class="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400/70" required>
+            <input type="password" name="password" class="w-full rounded-lg bg-black/30 border border-white/10 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400/70" required>
             @error('password')<p class="text-sm text-red-300 mt-1">{{ $message }}</p>@enderror
         </div>
         <div>

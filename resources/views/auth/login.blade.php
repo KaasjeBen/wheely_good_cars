@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-lg mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl shadow-orange-500/10 backdrop-blur">
+<div class="max-w-lg mx-auto bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 shadow-xl shadow-green-500/10 backdrop-blur">
     <h1 class="text-3xl font-semibold mb-2">Inloggen</h1>
     <p class="text-gray-300 mb-6">Log in om je aanbiedingen te beheren.</p>
     <form method="POST" action="{{ route('login.perform') }}" class="space-y-4">
